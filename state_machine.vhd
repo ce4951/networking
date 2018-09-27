@@ -3,14 +3,13 @@
 
 library ieee;
 use ieee.std_logic_1164.all;
---use ieee.std_logic_unsigned.all;
 
 -- Inputs and outputs of the state machine
 entity state_machine is
 port( -- Inputs - reset for testing, clock signal to advance state, and
       -- reciver signal and timer signal for next state logic
-      RST, CLK  : in std_logic;
-      RX, TIMER : in std_logic;
+      RST_n, CLK : in std_logic;
+      RX, INT_n  : in std_logic;
 
       -- Outputs - current state to send to the top level for output
       STATE : out std_logic_vector(1 downto 0));
@@ -32,16 +31,16 @@ architecture behavioral of state_machine is
     -- Begin state machine logic
     begin
       -- Next state logic
-      D <= IDLE when Q=BUSY and TIMER='1' and RX='1' else
+      D <= IDLE when Q=BUSY and INT_n='0' and RX='1' else
            BUSY when Q=IDLE and RX_CHANGED='1'       else
            BUSY when Q=COLL and RX_CHANGED='1'       else
-           COLL when Q=BUSY and TIMER='1' and RX='0' else
+           COLL when Q=BUSY and INT_n='0' and RX='0' else
            IDLE;
 
     -- Next state memory
-    NEXTSTATE: process(RST, CLK)
+    NEXTSTATE: process(RST_n, CLK)
     begin
-      if RST='0'             then Q<=IDLE;
+      if RST_n='0'           then Q<=IDLE;
       elsif rising_edge(CLK) then Q<=D;
       end if;
     end process;
