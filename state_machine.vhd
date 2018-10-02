@@ -35,7 +35,7 @@ architecture behavioral of state_machine is
            BUSY when Q=IDLE and RX_CHANGED='1'       else
            BUSY when Q=COLL and RX_CHANGED='1'       else
            COLL when Q=BUSY and INT_n='0' and RX='0' else
-           IDLE;
+           Q;
 
     -- Next state memory
     NEXTSTATE: process(RST_n, CLK)

@@ -3,7 +3,7 @@
 library ieee;
 use ieee.std_logic_1164.all;
 
-entity timer is
+entity interrupt_timer is
 generic (
 	timeNS: Integer := 100000000;
 	masterClkPeriodNS: Integer := 20						--50 MHz clock = 20 ns period
@@ -13,9 +13,9 @@ port (
 	rst_n, clk: 	in std_logic;
 	interrupt_n: 	out std_logic
 );
-end entity timer;
+end entity interrupt_timer;
 
-architecture behavioral of timer is
+architecture behavioral of interrupt_timer is
 
 begin
 
