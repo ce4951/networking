@@ -32,7 +32,7 @@ architecture BEHAVIORAL of channel_monitor is
 		RST_n, CLK : in std_logic;
 		RX, INT_n  : in std_logic;
 
-      STATE : out std_logic_vector(1 downto 0)
+		STATE : out std_logic_vector(1 downto 0)
 	);
 	end component;
 	
