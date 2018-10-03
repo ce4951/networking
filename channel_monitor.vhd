@@ -40,7 +40,7 @@ architecture BEHAVIORAL of channel_monitor is
 		U1 : interrupt_timer
 			generic map (
 				timeNS => 1110000,
-				masterClkPeriodNS => 20
+				masterClkPeriodNS => 10000
 			)
 			
 			port map (
