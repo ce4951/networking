@@ -31,7 +31,7 @@ ENTITY tb_channel_monitor IS
 END tb_channel_monitor;
 ARCHITECTURE channel_monitor_arch OF tb_channel_monitor IS
 -- constants
-CONSTANT clk_period : time := 20000 ns;                                                 
+CONSTANT clk_period : time := 20 ns;                                                 
 -- signals                                                   
 SIGNAL BUSY : STD_LOGIC;
 SIGNAL CLK : STD_LOGIC := '0';
@@ -83,13 +83,13 @@ BEGIN
 --	wait for 500 ms; 
 --end process;
 --
---test_case_4 : PROCESS is
---begin
---	RX <= '0';
---	wait for 1 ms; 
---	RX <= '1';
---	wait for 1 ms;
---end process;
+test_case_4 : PROCESS is
+begin
+	RX <= '0';
+	wait for 1 ms; 
+	RX <= '1';
+	wait for 1 ms;
+end process;
 
 --test_case_6 : PROCESS is
 --begin
