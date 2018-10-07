@@ -10,6 +10,10 @@
 
 #include "Manchester_State.h"
 #include "gpio.h"
+#include "Transmitter.h"
+
+#define F_CPU 16000000UL
+#define baud 19200
 
 static volatile GPIOx *GPIOC = (GPIOx *) 0x40020800;
 static void setLED(enum STATES state);
@@ -26,6 +30,7 @@ static void setLED(enum STATES state);
  */
 int main(void){
 	init_state();
+	init_usart2(baud, F_CPU);
 
 	//GPIOC clock already selected
 	//set GPIOC pin 1,2,3 to output for LEDs
@@ -38,12 +43,19 @@ int main(void){
 
 	setLED(currentState);
 
-	while(1==1){
+	while(1){
 		currentState = getState();
 
-		if(currentState != lastState){
-			setLED(currentState);
-			lastState = currentState;
+		switch(currentState){
+			case IDLE:
+				transmit();
+				break;
+			case BUSY:
+				break;
+			case COLLISION:
+				break;
+			default:
+				break;
 		}
 	}
 

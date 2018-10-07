@@ -19,8 +19,8 @@ typedef struct {
 	uint8_t buffer[BUF_SIZE];
 } RingBuffer;
 
-extern void put(volatile RingBuffer* buffer, uint8_t element);
-extern uint8_t get(volatile RingBuffer* buffer);
+extern void put(volatile RingBuffer* buffer, char element);
+extern char get(volatile RingBuffer* buffer);
 extern int hasSpace(volatile RingBuffer* buffer);
 extern int hasElement(volatile RingBuffer* buffer);
 
