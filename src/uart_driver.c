@@ -27,6 +27,21 @@ char usart2_getch(){
 	return c;
 }
 
+char usart2_getch_noblock(){
+	if(hasElement(recieveBuffer)){
+		char c = get(recieveBuffer);
+
+		if (c == '\r'){  // If character is CR
+			usart2_putch('\n');  // send it
+			c = '\n';   // Return LF. fgets is terminated by LF
+		}
+
+		return c;
+	}
+
+	return 0;
+}
+
 void usart2_putch(char c){
 		put(sendBuffer,c);
 		*(USART_CR1) |= (1<<TXEIE); //enable TXE interrupt

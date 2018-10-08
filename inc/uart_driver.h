@@ -46,6 +46,7 @@
 // Function prototypes
 extern void init_usart2(uint32_t baud, uint32_t sysclk);
 extern char usart2_getch();
+extern char usart2_getch_noblock();
 extern void usart2_putch(char c);
 
 #endif /* UART_DRIVER_H_ */

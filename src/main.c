@@ -11,6 +11,7 @@
 #include "Manchester_State.h"
 #include "gpio.h"
 #include "Transmitter.h"
+#include "uart_driver.h"
 
 #define F_CPU 16000000UL
 #define baud 19200
@@ -31,6 +32,7 @@ static void setLED(enum STATES state);
 int main(void){
 	init_state();
 	init_usart2(baud, F_CPU);
+	init_transmitter();
 
 	//GPIOC clock already selected
 	//set GPIOC pin 1,2,3 to output for LEDs
@@ -40,6 +42,8 @@ int main(void){
 
 	enum STATES lastState = getState();
 	enum STATES currentState = getState();
+
+	char message[50];
 
 	setLED(currentState);
 
