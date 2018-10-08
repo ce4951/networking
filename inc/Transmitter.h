@@ -10,6 +10,7 @@
 
 //NVIC constants
 #define NVIC_ISER1 (volatile uint32_t*)		0xE000E104
+#define NVIC_IPR12 (volatile uint32_t*)		0xE000E430
 
 //TIM5 constants0x4000 0C00
 #define TIM5_PSC 	(volatile uint32_t*)	0x40000C28

@@ -57,6 +57,9 @@ void init_transmitter(){
 	//enable in NVIC (50)
 	*(NVIC_ISER1) |= 1<<18;
 
+	//set lower interrupt priority
+	*(NVIC_IPR12) |= (0xFF << 16);
+
 	//Don't enable the counter. Nothing to Transfer yet
 }
 
@@ -108,8 +111,10 @@ void TIM5_IRQHandler(){
 			manchesterBit = ~manchesterBit;
 
 			//Set the GPIO pin according to bit 0
-			GPIOC -> ODR &= ~(1 << 4);
-			GPIOC -> ODR |= (byteToSend << 4);
+			GPIOC -> BSSR |= (((~byteToSend << 4) << 16) | (byteToSend << 4));
+
+			//clear flag
+			*(TIM5_SR) &= ~(1<<2);
 
 			//if the manchester bit is 0, next bit needed
 			if((manchesterBit & 0x01) == 0x00){
@@ -127,14 +132,14 @@ void TIM5_IRQHandler(){
 			messageToSend.position = 0;
 			messageToSend.length = 0;
 			transferringMessage = false;
+			GPIOC -> ODR |= (1 << 4);
 		}
 
 	}else{
 		//could not finish message and needs to re-transfer
 		messageToSend.position = 0;
+		*(TIM5_CR1) &= ~(1 << 0);
+		GPIOC -> ODR |= (1 << 4);
 	}
-
-	//clear flag
-	*(TIM2_SR) &= ~(1<<2);
 }
 
