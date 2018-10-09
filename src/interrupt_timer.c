@@ -32,5 +32,4 @@ void init_interrupt_timer(){
 
 	//enable the counter by setting CEN bit in CR1
 	*(TIM2_CR1) |= 1;
-
 }

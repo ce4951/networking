@@ -16,9 +16,6 @@
 #define F_CPU 16000000UL
 #define baud 19200
 
-static volatile GPIOx *GPIOC = (GPIOx *) 0x40020800;
-static void setLED(enum STATES state);
-
 /**
  * The main function for this application runs a state machine, while
  * periodically checking for a user entering the admin password. In
@@ -34,52 +31,7 @@ int main(void){
 	init_usart2(baud, F_CPU);
 	init_transmitter();
 
-	//GPIOC clock already selected
-	//set GPIOC pin 1,2,3 to output for LEDs
-	set_pin_mode('C', 1, OUTPUT);
-	set_pin_mode('C', 2, OUTPUT);
-	set_pin_mode('C', 3, OUTPUT);
-
-	enum STATES lastState = getState();
-	enum STATES currentState = getState();
-
-	char message[50];
-
-	setLED(currentState);
-
-	while(1){
-		currentState = getState();
-
-		switch(currentState){
-			case IDLE:
-				transmit();
-				break;
-			case BUSY:
-				break;
-			case COLLISION:
-				break;
-			default:
-				break;
-		}
-	}
+	while(1) {};
 
 	return 0;
-}
-
-static void setLED(enum STATES state){
-	GPIOC -> ODR &= ~(0b111 << 1);
-
-	switch(state){
-		case IDLE:
-			GPIOC -> ODR |= (0b001 << 1);
-			break;
-		case BUSY:
-			GPIOC -> ODR |= (0b010 << 1);
-			break;
-		case COLLISION:
-			GPIOC -> ODR |= (0b100 << 1);
-			break;
-		default:
-			break;
-	}
 }

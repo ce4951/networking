@@ -9,7 +9,6 @@
 
 static volatile EXTI *EXTI0 = (EXTI *) 0x40013C00;
 
-
 void init_RX_channel(){
 	//Setup PC0 on the GPIO ports
 
