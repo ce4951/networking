@@ -31,7 +31,23 @@ int main(void){
 	init_usart2(baud, F_CPU);
 	init_transmitter();
 
-	while(1) {};
+	enum STATES currentState = getState();
+
+	while(1){
+		currentState = getState();
+
+		switch(currentState){
+			case IDLE:
+				transmit();
+				break;
+			case BUSY:
+				break;
+			case COLLISION:
+				break;
+			default:
+				break;
+		}
+	}
 
 	return 0;
 }
