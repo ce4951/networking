@@ -5,7 +5,7 @@
  *      Author: larsonma
  */
 
-#include "Transmitter.h"
+#include <Transmitter.h>
 #include <stdbool.h>
 #include "Manchester_State.h"
 #include "uart_driver.h"
@@ -68,25 +68,21 @@ void init_transmitter(){
 //messageToSend. If state becomes COLLISION, return from transmit
 //and do not clear the message in messageToSend
 void transmit(){
-	bool receivingMessage = false;
-
 	//Make sure not in collision state
-	while(getState() != COLLISION){
-		while(!transferringMessage){
-			char temp = usart2_getch_noblock();
-			if(temp != 0 && temp != '\n'){
-				//character was typed, add it to the messageToSend
+	while(getState() == IDLE && !transferringMessage){
+		char temp = usart2_getch_noblock();
+		if(temp != 0 && temp != '\n'){
+			//character was typed, add it to the messageToSend
 
-				messageToSend.buffer[messageToSend.position] = temp;
-				messageToSend.position++;
-				messageToSend.length++;
+			messageToSend.buffer[messageToSend.position] = temp;
+			messageToSend.position++;
+			messageToSend.length++;
 
-			}else if(temp != 0 && temp == '\n'){
-				//end message - start clock
-				messageToSend.position = 0;
-				transferringMessage = true;
-				*(TIM5_CR1) |= 1;
-			}
+		}else if(temp != 0 && temp == '\n'){
+			//end message - start clock
+			messageToSend.position = 0;
+			transferringMessage = true;
+			*(TIM5_CR1) |= 1;
 		}
 	}
 }
@@ -100,9 +96,6 @@ void TIM5_IRQHandler(){
 			//move the bit to be sent to position 0
 			byteToSend = byteToSend >> bitmask;
 
-			//Eliminate data other than position 0
-			manchesterBit &= 0x01;
-
 			//Bit is now at position 0, apply XNOR
 			byteToSend = ~(byteToSend^(manchesterBit));
 			byteToSend &= 0x01;
@@ -113,16 +106,13 @@ void TIM5_IRQHandler(){
 			//Set the GPIO pin according to bit 0
 			GPIOC -> BSSR |= (((~byteToSend << 4) << 16) | (byteToSend << 4));
 
-			//clear flag
-			*(TIM5_SR) &= ~(1<<2);
-
 			//if the manchester bit is 0, next bit needed
 			if((manchesterBit & 0x01) == 0x00){
 				bitmask--;
 
 				//if the bitmask is 8, the character has been sent
 				if(bitmask == -1){
-					messageToSend.position++;
+					messageToSend.position++;	// Comment out to send infinite stream of data
 					bitmask = 7;
 				}
 			}
@@ -141,5 +131,8 @@ void TIM5_IRQHandler(){
 		*(TIM5_CR1) &= ~(1 << 0);
 		GPIOC -> ODR |= (1 << 4);
 	}
+
+	//clear flag
+	*(TIM5_SR) &= ~(1<<2);
 }
 

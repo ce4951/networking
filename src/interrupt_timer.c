@@ -12,10 +12,10 @@ void init_interrupt_timer(){
 	*(APB1ENR) |= 1;
 
 	//reload set to 1.11 ms
-	*(TIM2_ARR) = (17760-1);	// 1/16000000 * 17760 = 1.11ms
+	*(TIM2_ARR) = (18000-1);	// 1/16000000 * 17760 = 1.11ms
 
 	//compare to 1.11 ms
-	*(TIM2_CCR2) = (17760-1);
+	*(TIM2_CCR2) = (18000-1);
 
 	//select output mode (0b001)
 	*(TIM2_CCMR1) &= ~(0b111<<12);
