@@ -1,14 +1,17 @@
 /*
- * uart_driver.h
+ * uart_driver.c
  *
  *  Created on: Nov 8, 2016
  *      Author: barnekow
+ *  Edited on:  Feb 3, 2017
+ *  	Author: Mitchell Larson
  */
 
 #ifndef UART_DRIVER_H_
 #define UART_DRIVER_H_
 
 #include <inttypes.h>
+#include "ringbuffer.h"
 
 // RCC registers
 #define RCC_APB1ENR (volatile uint32_t*) 0x40023840
@@ -31,14 +34,19 @@
 #define UE 13 //UART enable
 #define TE 3  // Transmitter enable
 #define RE 2  // Receiver enable
+#define TXEIE 7 //TXE interrupt enable
+#define RXNEIE 5 //RXNEIE interrupt enable
 
 // Status register bits
 #define TXE 7  // Transmit register empty
 #define RXNE 5  // Receive register is not empty..char received
 
+#define NVIC_ISER1 (volatile uint32_t*) 0xE000E104
+
 // Function prototypes
 extern void init_usart2(uint32_t baud, uint32_t sysclk);
 extern char usart2_getch();
+extern char usart2_getch_noblock();
 extern void usart2_putch(char c);
 
 #endif /* UART_DRIVER_H_ */

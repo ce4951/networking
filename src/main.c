@@ -10,9 +10,11 @@
 
 #include "Manchester_State.h"
 #include "gpio.h"
+#include "Transmitter.h"
+#include "uart_driver.h"
 
-static volatile GPIOx *GPIOC = (GPIOx *) 0x40020800;
-static void setLED(enum STATES state);
+#define F_CPU 16000000UL
+#define baud 19200
 
 /**
  * The main function for this application runs a state machine, while
@@ -26,44 +28,26 @@ static void setLED(enum STATES state);
  */
 int main(void){
 	init_state();
+	init_usart2(baud, F_CPU);
+	init_transmitter();
 
-	//GPIOC clock already selected
-	//set GPIOC pin 1,2,3 to output for LEDs
-	set_pin_mode('C', 1, OUTPUT);
-	set_pin_mode('C', 2, OUTPUT);
-	set_pin_mode('C', 3, OUTPUT);
-
-	enum STATES lastState = getState();
 	enum STATES currentState = getState();
 
-	setLED(currentState);
-
-	while(1==1){
+	while(1){
 		currentState = getState();
 
-		if(currentState != lastState){
-			setLED(currentState);
-			lastState = currentState;
+		switch(currentState){
+			case IDLE:
+				transmit();
+				break;
+			case BUSY:
+				break;
+			case COLLISION:
+				break;
+			default:
+				break;
 		}
 	}
 
 	return 0;
-}
-
-static void setLED(enum STATES state){
-	GPIOC -> ODR &= ~(0b111 << 1);
-
-	switch(state){
-		case IDLE:
-			GPIOC -> ODR |= (0b001 << 1);
-			break;
-		case BUSY:
-			GPIOC -> ODR |= (0b010 << 1);
-			break;
-		case COLLISION:
-			GPIOC -> ODR |= (0b100 << 1);
-			break;
-		default:
-			break;
-	}
 }

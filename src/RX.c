@@ -9,7 +9,6 @@
 
 static volatile EXTI *EXTI0 = (EXTI *) 0x40013C00;
 
-
 void init_RX_channel(){
 	//Setup PC0 on the GPIO ports
 
@@ -40,6 +39,6 @@ void init_RX_channel(){
 	*(NVIC_ISER0) |= 1<<6;
 
 	//Set the pin to a lower priority
-	*(NVIC_IPR1) |= (0xFF << 16);
+	*(NVIC_IPR1) |= (0xF0 << 16);
 }
 
