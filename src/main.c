@@ -8,10 +8,11 @@
  * 3 different modes. A scanning mode, an alarm mode, and an admin mode
  */
 
-#include "Manchester_State.h"
-#include "gpio.h"
-#include "Transmitter.h"
-#include "uart_driver.h"
+#include "../inc/Manchester_State.h"
+#include "../inc/gpio.h"
+#include "../inc/Transmitter.h"
+#include "../inc/uart_driver.h"
+#include "../inc/receiver.h"
 
 #define F_CPU 16000000UL
 #define baud 19200
@@ -29,6 +30,7 @@
 int main(void){
 	init_state();
 	init_usart2(baud, F_CPU);
+	init_receiver();
 	init_transmitter();
 
 	enum STATES currentState = getState();

@@ -5,10 +5,10 @@
  *      Author: larsonma
  */
 
-#include <Transmitter.h>
+#include "../inc/Transmitter.h"
 #include <stdbool.h>
-#include "Manchester_State.h"
-#include "uart_driver.h"
+#include "../inc/Manchester_State.h"
+#include "../inc/uart_driver.h"
 
 typedef struct {
 	unsigned int position;

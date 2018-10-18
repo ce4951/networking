@@ -6,7 +6,7 @@
  *  Edited on:  Feb 3, 2017
  *  	Author: Mitchell Larson
  */
-#include "uart_driver.h"
+#include "../inc/uart_driver.h"
 #include <stdio.h>
 
 static volatile RingBuffer* sendBuffer;

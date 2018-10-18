@@ -60,7 +60,7 @@
 #include <sys/time.h>
 #include <sys/times.h>
 
-#include "uart_driver.h"
+#include "../inc/uart_driver.h"
 
 /* Variables */
 //#undef errno

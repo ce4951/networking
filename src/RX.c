@@ -5,40 +5,40 @@
  *      Author: larsonma
  */
 
-#include "RX.h"
+#include "../inc/RX.h"
 
-static volatile EXTI *EXTI0 = (EXTI *) 0x40013C00;
+static volatile EXTI *EXTI6 = (EXTI *) 0x40013C00;
 
 void init_RX_channel(){
-	//Setup PC0 on the GPIO ports
+	//Setup PC6 on the GPIO ports
 
 	//Enable GPIO clock
 	enable_clock('C');
 
 	//Set to input mode
-	set_pin_mode('C', 0, INPUT);
+	set_pin_mode('C', 6, INPUT);
 
 	//Enable SYSCFGEN
 	(*APB2ENR) |= 1<<14;
 
 	//Set port A for SYSCFG
-	(*EXTICR1) &= ~(0b1111);
-	(*EXTICR1) |= 0b0010;
+	(*EXTICR2) &= ~((0b1111) << 8);
+	(*EXTICR2) |= (0b0010 << 8);
 
 	//Enable EXTI interrupt
-	EXTI0->IMR |= 1<<0;
+	EXTI6->IMR |= 1<<6;
 
 	//Enable interrupt on rising edge
-	EXTI0->RTSR |= 1<<0;
+	EXTI6->RTSR |= 1<<6;
 
 	//Enable interrupt on falling edge
-	EXTI0->FTSR |= 1<<0;
+	EXTI6->FTSR |= 1<<6;
 
-	//PC0 is connected to EXTI0
+	//PC6 is connected to EXTI6
 	//enable in NVIC
-	*(NVIC_ISER0) |= 1<<6;
+	*(NVIC_ISER0) |= 1<<23;
 
 	//Set the pin to a lower priority
-	*(NVIC_IPR1) |= (0xF0 << 16);
+	*(NVIC_IPR5) |= (0xF0 << 24);
 }
 
