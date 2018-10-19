@@ -7,7 +7,7 @@
  *  use, while minimizing risk of mistakes. Currently works for ports A,B, and C
  */
  
-#include "../inc/gpio.h"
+#include "gpio.h"
 
 static volatile GPIOx *GPIOA = (GPIOx *) 0x40020000;
 static volatile GPIOx *GPIOB = (GPIOx *) 0x40020400;

@@ -5,8 +5,8 @@
  *      Author: larsonma
  */
 
-#include "../inc/Manchester_State.h"
-#include "../inc/gpio.h"
+#include "Manchester_State.h"
+#include "gpio.h"
 
 static uint8_t RX;
 static volatile EXTI *EXTI6 = (EXTI *) 0x40013C00;

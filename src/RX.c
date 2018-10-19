@@ -5,7 +5,7 @@
  *      Author: larsonma
  */
 
-#include "../inc/RX.h"
+#include "RX.h"
 
 static volatile EXTI *EXTI6 = (EXTI *) 0x40013C00;
 

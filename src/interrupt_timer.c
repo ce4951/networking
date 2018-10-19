@@ -5,7 +5,7 @@
  *      Author: larsonma
  */
 
-#include "../inc/interrupt_timer.h"
+#include "interrupt_timer.h"
 
 void init_interrupt_timer(){
 	//enable clock for TIM2

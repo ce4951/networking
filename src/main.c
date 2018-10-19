@@ -8,11 +8,11 @@
  * 3 different modes. A scanning mode, an alarm mode, and an admin mode
  */
 
-#include "../inc/Manchester_State.h"
-#include "../inc/gpio.h"
-#include "../inc/Transmitter.h"
-#include "../inc/uart_driver.h"
-#include "../inc/receiver.h"
+#include "Manchester_State.h"
+#include "gpio.h"
+#include "Transmitter.h"
+#include "uart_driver.h"
+#include "receiver.h"
 
 #define F_CPU 16000000UL
 #define baud 19200

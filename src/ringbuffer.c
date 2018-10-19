@@ -4,7 +4,7 @@
  *  Created on: Jan 30, 2017
  *      Author: Mitchell Larson
  */
-#include "../inc/ringbuffer.h"
+#include "ringbuffer.h"
 
 //void put(volatile RingBuffer* buffer, char element);
 //char get(volatile RingBuffer* buffer);
