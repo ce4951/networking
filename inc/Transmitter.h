@@ -30,7 +30,10 @@
 #define APB2ENR		(volatile uint32_t*)	0x40023844
 #define APB1ENR		(volatile uint32_t*)	0x40023840
 
+#include <stdbool.h>
+
 extern void init_transmitter();
+extern bool is_transmitting();
 extern void transmit();
 
 #endif /* TRANSMITTER_H_ */
