@@ -14,8 +14,8 @@
 
 #define NVIC_ISER0 (volatile uint32_t*)		0xE000E100
 #define APB2ENR		(volatile uint32_t*)	0x40023844
-#define EXTICR1		(volatile uint32_t*)	0x40013808
-#define NVIC_IPR1		(volatile uint32_t*)	0xE000E404
+#define EXTICR2		(volatile uint32_t*)	0x4001380C
+#define NVIC_IPR5		(volatile uint32_t*)	0xE000E414
 
 typedef struct{
 	uint32_t IMR;

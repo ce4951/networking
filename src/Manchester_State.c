@@ -9,7 +9,7 @@
 #include "gpio.h"
 
 static uint8_t RX;
-static volatile EXTI *EXTI0 = (EXTI *) 0x40013C00;
+static volatile EXTI *EXTI6 = (EXTI *) 0x40013C00;
 static volatile GPIOx *GPIOC = (GPIOx *) 0x40020800;
 
 static volatile enum STATES state;
@@ -70,7 +70,7 @@ void TIM2_IRQHandler(void){
 	}
 
 	// Obtain the most recent RX value
-	RX = (GPIOC -> IDR) & (1 << 0);
+	RX = (GPIOC -> IDR) & (1 << 6);
 
 	// Set LEDs to match state
 	setLED(state);
@@ -80,7 +80,7 @@ void TIM2_IRQHandler(void){
 }
 
 //Edge Has Occured
-void EXTI0_IRQHandler(void){
+void EXTI9_5_IRQHandler(void){
 	//Set the Timer count to original value
 	*(TIM2_CNT) = 0;
 
@@ -88,13 +88,13 @@ void EXTI0_IRQHandler(void){
 	state = BUSY;
 
 	//capture RX
-	RX = (GPIOC -> IDR) & (1 << 0);
+	RX = (GPIOC -> IDR) & (1 << 6);
 
 	// Set LEDs to match state
 	setLED(state);
 
 	//clear the status bits for the timer and RX
 	*(TIM2_SR) &= ~(1<<2);
-	EXTI0 -> PR |= 1<<0;
+	EXTI6 -> PR |= 1<<6;
 }
 

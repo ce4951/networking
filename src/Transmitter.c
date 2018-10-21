@@ -5,7 +5,7 @@
  *      Author: larsonma
  */
 
-#include <Transmitter.h>
+#include "Transmitter.h"
 #include <stdbool.h>
 #include "Manchester_State.h"
 #include "uart_driver.h"
