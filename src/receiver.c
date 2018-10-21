@@ -95,8 +95,8 @@ void receive(){
 	//Once full message has been received, translate, print, and return
 	if(getState() == IDLE){
 		//First we need to get the last bit if it wasn't captured.
-		//This can happen if the last bit is a 1 and the line stays
-		//IDLE
+		//This can happen if the last bit is a 1 and the line goes
+		//IDLE. We should have filled bytes.
 		if((bitCount % 8) != 0){
 			data[bytes] = data[bytes] << 1;
 			data[bytes] |= 1;
@@ -113,18 +113,22 @@ void receive(){
 			uint8_t data1 = data[i];
 			uint8_t data2 = data[i+1];
 
+			//four bits of data are contained in each Manchester byte
 			for(int j = 4; j > 0; j--){
-				asciiChar = asciiChar << 2;
+				asciiChar = asciiChar << 1;
 
-				 data1_xx = (data1 >> ((j*2) - 1));
-				 data2_xx = (data2 >> ((j*2) - 1));
+				//shift two bits to position 1 and 0, starting with msb
+				data1_xx = (data1 >> ((j*2) - 1));
+				data2_xx = (data2 >> ((j*2) - 1));
 
+				 //Fill the upper nibble
 				 if((data1_xx & 0b11) == 0b01){
 					 asciiChar |= (0b1 << 4);
 				 }else if((data1_xx & 0b11) == 0b10){
 
 				 }
 
+				 //Fill the lower nibble
 				 if((data2_xx & 0b11) == 0b01){
 					 asciiChar |= 0b1;
 				 }else if((data2_xx & 0b11) == 0b10){
@@ -132,6 +136,7 @@ void receive(){
 				 }
 			}
 
+			//place decoded byte into temporary buffer
 			temp[i/2] = asciiChar;
 		}
 
