@@ -4,9 +4,19 @@
 #define timerOffset 65535
 #define halfBitPeriod 8106
 
+
+unsigned int bitCount;
+unsigned int bytes;
+uint8_t* data;
+
 uint16_t lastTimestamp;
 
 void init_receiver(){
+	bitCount = 0;
+	bytes = 0;
+	data = malloc(sizeof(char) * 100);
+	memset(data, 100, sizeof(char));
+
 	//enable clock for TIM3
 	*(APB1ENR) |= (1 << 1);
 
@@ -48,18 +58,92 @@ void receive(){
 	//Make sure a message is being received and it's not loopback
 	while(getState() == BUSY && !is_transmitting()){
 		//Check if a edge transition has occured
-		if((*(TIM3_SR) && (1 << 1)) == 0x01){
+		if((*(TIM3_SR) & (1 << 1)) == 0x01){
 			uint8_t rx = get_rx();
-			uint16_t captureValue = (*(TIM3_CCR1) && 0xFF);
+			uint16_t captureValue = (*(TIM3_CCR1) & 0xFF);
 
-			uint16_t timeElapsed = (captureValue < lastTimestamp) ? captureValue + timerOffset - lastTimestamp : captureValue - lastTimestamp;
+			uint16_t timeElapsed = (captureValue < lastTimestamp) ?
+					captureValue + timerOffset - lastTimestamp : captureValue - lastTimestamp;
 
-			if(timeElapsed <= halfBitPeriod){
+			if(bitCount == 0){
+				if(timeElapsed <= halfBitPeriod){
+					data[bytes] = data[bytes] << 1;
 
+					if(rx == 0){
+						data[bytes] |= 0b01;
+					}
+				}else{
+					data[bytes] = data[bytes] << 2;
+
+					if(rx == 0){
+						data[bytes] |= 0b11;
+					}
+				}
 			}else{
-
+				data[bytes] = 0x01;
 			}
+
+			bitCount++;
+			if(bitCount % 8 == 0) bytes++;
+
+			lastTimestamp = captureValue;
+			//clear interrupt flag
+			*(TIM3_SR) &= ~(1 << 1);
 		}
+	}
+
+	//Once full message has been received, translate, print, and return
+	if(getState() == IDLE){
+		//First we need to get the last bit if it wasn't captured.
+		//This can happen if the last bit is a 1 and the line stays
+		//IDLE
+		if((bitCount % 8) != 0){
+			data[bytes] = data[bytes] << 1;
+			data[bytes] |= 1;
+		}
+
+
+		//create a temporary buffer of bytes/2
+		char temp[bytes/2];
+		uint8_t data1_xx;
+		uint8_t data2_xx;
+
+		for(int i = 0; i < bytes; i += 2){
+			char asciiChar = 0x00;
+			uint8_t data1 = data[i];
+			uint8_t data2 = data[i+1];
+
+			for(int j = 4; j > 0; j--){
+				asciiChar = asciiChar << 2;
+
+				 data1_xx = (data1 >> ((j*2) - 1));
+				 data2_xx = (data2 >> ((j*2) - 1));
+
+				 if((data1_xx & 0b11) == 0b01){
+					 asciiChar |= (0b1 << 4);
+				 }else if((data1_xx & 0b11) == 0b10){
+
+				 }
+
+				 if((data2_xx & 0b11) == 0b01){
+					 asciiChar |= 0b1;
+				 }else if((data2_xx & 0b11) == 0b10){
+
+				 }
+			}
+
+			temp[i/2] = asciiChar;
+		}
+
+		//send characters to console out
+		for(int i = 0; i < bytes/2; i++){
+			usart2_putch(temp[i]);
+		}
+
+		//reset all data
+		bitCount = 0;
+		bytes = 0;
+		memset(data, 100, sizeof(char));
 	}
 }
 

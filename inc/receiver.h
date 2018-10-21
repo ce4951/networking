@@ -8,6 +8,14 @@
 #ifndef RECEIVER_H
 #define RECEIVER_H
 
+#include <stdint.h>
+#include <stdlib.h>
+#include <stdio.h>
+#include <string.h>
+
+#include "Manchester_State.h"
+#include "Transmitter.h"
+
 // TIM3 constants 0x4000 0400
 #define TIM3_PSC 	(volatile uint32_t*)	0x40000428
 #define TIM3_ARR	(volatile uint32_t*)	0x4000042C
