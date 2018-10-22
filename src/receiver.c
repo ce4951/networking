@@ -62,7 +62,7 @@ void receive(){
 		//Check if a edge transition has occured
 		if((*(TIM3_SR) & (1 << 1)) == 0x02){
 			uint8_t rx = (get_rx() & 0x01);
-			uint16_t captureValue = (*(TIM3_CCR1) & 0xFF);
+			uint16_t captureValue = (*(TIM3_CCR1) & 0xFFFF);
 
 			uint16_t timeElapsed = (captureValue < lastTimestamp) ?
 					captureValue + timerOffset - lastTimestamp : captureValue - lastTimestamp;
