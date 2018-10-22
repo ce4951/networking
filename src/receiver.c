@@ -7,14 +7,16 @@
 
 unsigned int bitCount;
 unsigned int bytes;
-uint8_t* data;
+uint8_t data[100];
+
+bool messageReceived;
 
 uint16_t lastTimestamp;
 
 void init_receiver(){
 	bitCount = 0;
 	bytes = 0;
-	data = malloc(sizeof(char) * 100);
+	messageReceived = false;
 	memset(data, 100, sizeof(char));
 
 	//enable clock for TIM3
@@ -59,47 +61,51 @@ void receive(){
 	while(getState() == BUSY && !is_transmitting()){
 		//Check if a edge transition has occured
 		if((*(TIM3_SR) & (1 << 1)) == 0x02){
-			uint8_t rx = get_rx();
+			uint8_t rx = (get_rx() & 0x01);
 			uint16_t captureValue = (*(TIM3_CCR1) & 0xFF);
 
 			uint16_t timeElapsed = (captureValue < lastTimestamp) ?
 					captureValue + timerOffset - lastTimestamp : captureValue - lastTimestamp;
 
 			if(bitCount != 0){
-				if(timeElapsed <= halfBitPeriod){
+				data[bytes] = data[bytes] << 1;
+
+				if(rx == 0){
+					data[bytes] |= 0b01;
+				}
+				bitCount++;
+				if(bitCount % 8 == 0) bytes++;
+
+				if(timeElapsed > halfBitPeriod){
 					data[bytes] = data[bytes] << 1;
 
 					if(rx == 0){
 						data[bytes] |= 0b01;
 					}
-				}else{
-					data[bytes] = data[bytes] << 2;
-
-					if(rx == 0){
-						data[bytes] |= 0b11;
-					}
+					bitCount++;
+					if(bitCount % 8 == 0) bytes++;
 				}
 			}else{
 				data[bytes] = 0x01;
+				bitCount++;
 			}
-
-			bitCount++;
-			if(bitCount % 8 == 0) bytes++;
 
 			lastTimestamp = captureValue;
 			//clear interrupt flag
 			*(TIM3_SR) &= ~(1 << 1);
 		}
+		messageReceived = true;
 	}
 
 	//Once full message has been received, translate, print, and return
-	if(getState() == IDLE){
+	if(getState() == IDLE && messageReceived){
 		//First we need to get the last bit if it wasn't captured.
 		//This can happen if the last bit is a 1 and the line goes
 		//IDLE. We should have filled bytes.
 		if((bitCount % 8) != 0){
 			data[bytes] = data[bytes] << 1;
 			data[bytes] |= 1;
+			bitCount++;
 		}
 
 
@@ -149,6 +155,7 @@ void receive(){
 		bitCount = 0;
 		bytes = 0;
 		memset(data, 100, sizeof(char));
+		messageReceived = false;
 	}
 }
 
