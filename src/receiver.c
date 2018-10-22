@@ -58,14 +58,14 @@ void receive(){
 	//Make sure a message is being received and it's not loopback
 	while(getState() == BUSY && !is_transmitting()){
 		//Check if a edge transition has occured
-		if((*(TIM3_SR) & (1 << 1)) == 0x01){
+		if((*(TIM3_SR) & (1 << 1)) == 0x02){
 			uint8_t rx = get_rx();
 			uint16_t captureValue = (*(TIM3_CCR1) & 0xFF);
 
 			uint16_t timeElapsed = (captureValue < lastTimestamp) ?
 					captureValue + timerOffset - lastTimestamp : captureValue - lastTimestamp;
 
-			if(bitCount == 0){
+			if(bitCount != 0){
 				if(timeElapsed <= halfBitPeriod){
 					data[bytes] = data[bytes] << 1;
 
