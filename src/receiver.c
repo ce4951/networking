@@ -2,7 +2,8 @@
 #include "receiver.h"
 
 #define timerOffset 65535
-#define halfBitPeriod 8106
+//#define halfBitPeriod 8106
+#define halfBitPeriod 10000
 
 
 unsigned int bitCount;
@@ -17,7 +18,7 @@ void init_receiver(){
 	bitCount = 0;
 	bytes = 0;
 	messageReceived = false;
-	memset(data, 100, sizeof(char));
+	memset(data, 0, 100*sizeof(char));
 
 	//enable clock for TIM3
 	*(APB1ENR) |= (1 << 1);
@@ -120,12 +121,12 @@ void receive(){
 			uint8_t data2 = data[i+1];
 
 			//four bits of data are contained in each Manchester byte
-			for(int j = 4; j > 0; j--){
+			for(int j = 3; j >= 0; j--){
 				asciiChar = asciiChar << 1;
 
 				//shift two bits to position 1 and 0, starting with msb
-				data1_xx = (data1 >> ((j*2) - 1));
-				data2_xx = (data2 >> ((j*2) - 1));
+				data1_xx = (data1 >> ((j*2) ));
+				data2_xx = (data2 >> ((j*2) ));
 
 				 //Fill the upper nibble
 				 if((data1_xx & 0b11) == 0b01){
@@ -154,7 +155,7 @@ void receive(){
 		//reset all data
 		bitCount = 0;
 		bytes = 0;
-		memset(data, 100, sizeof(char));
+		memset(data, 0, 100*sizeof(char));
 		messageReceived = false;
 	}
 }
