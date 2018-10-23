@@ -15,6 +15,7 @@
 
 #include "Manchester_State.h"
 #include "Transmitter.h"
+#include "uart_driver.h"
 
 // TIM3 constants 0x4000 0400
 #define TIM3_PSC 	(volatile uint32_t*)	0x40000428

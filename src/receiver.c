@@ -131,15 +131,11 @@ void receive(){
 				 //Fill the upper nibble
 				 if((data1_xx & 0b11) == 0b01){
 					 asciiChar |= (0b1 << 4);
-				 }else if((data1_xx & 0b11) == 0b10){
-
 				 }
 
 				 //Fill the lower nibble
 				 if((data2_xx & 0b11) == 0b01){
 					 asciiChar |= 0b1;
-				 }else if((data2_xx & 0b11) == 0b10){
-
 				 }
 			}
 
@@ -149,8 +145,16 @@ void receive(){
 
 		//send characters to console out
 		for(int i = 0; i < bytes/2; i++){
-			usart2_putch(temp[i]);
+			char toConsole = temp[i];
+
+			if(toConsole >= ' ' && toConsole <= '~'){
+				usart2_putch(temp[i]);
+			}else{
+				usart2_putch('*');
+			}
 		}
+		usart2_putch('\r');
+		usart2_putch('\n');
 
 		//reset all data
 		bitCount = 0;
@@ -158,13 +162,4 @@ void receive(){
 		memset(data, 0, 100*sizeof(char));
 		messageReceived = false;
 	}
-}
-
-/**
- * This interrupt handler translates clock edges into data following
- * the standard for CE 4951. The timer is set to input capture mode,
- * so timestamps are collected on each transition of the RX signal.
- */
-void TIM3_IRQHandler(void){
-
 }
