@@ -6,7 +6,6 @@
  */
 
 #include "Transmitter.h"
-#include <stdbool.h>
 #include "Manchester_State.h"
 #include "uart_driver.h"
 
@@ -61,6 +60,10 @@ void init_transmitter(){
 	*(NVIC_IPR12) |= (0xFF << 16);
 
 	//Don't enable the counter. Nothing to Transfer yet
+}
+
+bool is_transmitting(){
+	return transferringMessage;
 }
 
 //Attempt to send the message held in messageToSend. If successful,

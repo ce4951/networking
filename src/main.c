@@ -43,6 +43,7 @@ int main(void){
 				transmit();
 				break;
 			case BUSY:
+				receive();
 				break;
 			case COLLISION:
 				break;

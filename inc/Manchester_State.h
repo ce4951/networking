@@ -17,5 +17,6 @@ enum STATES {IDLE, BUSY, COLLISION};
 
 extern void init_state();
 enum STATES getState();
+extern uint8_t get_rx();
 
 #endif /* MANCHESTER_STATE_H_ */

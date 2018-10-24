@@ -15,8 +15,11 @@ void init_RX_channel(){
 	//Enable GPIO clock
 	enable_clock('C');
 
-	//Set to input mode
-	set_pin_mode('C', 6, INPUT);
+	//Set to alternate function mode
+	set_pin_mode('C', 6, ALTFUNC);
+
+	//set alternative function to use - TIM3, Channel 1
+	set_alt_func('C', 6, 2);
 
 	//Enable SYSCFGEN
 	(*APB2ENR) |= 1<<14;

@@ -33,6 +33,10 @@ enum STATES getState(){
 	return state;
 }
 
+uint8_t get_rx(){
+	return RX;
+}
+
 static void initLEDs(){
 	//enable GPIOC clock
 	enable_clock('C');
