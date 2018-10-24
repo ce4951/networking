@@ -2,8 +2,9 @@
 #include "receiver.h"
 
 #define timerOffset 65535
-//#define halfBitPeriod 8106
-#define halfBitPeriod 10000
+#define halfBitMax 10000
+
+static const char INVALID[] = "[INFO] Message outside specification received and discarded.\r\n";
 
 
 unsigned int bitCount;
@@ -11,6 +12,7 @@ unsigned int bytes;
 uint8_t data[100];
 
 bool messageReceived;
+bool invalidMessage;
 
 uint16_t lastTimestamp;
 
@@ -18,6 +20,7 @@ void init_receiver(){
 	bitCount = 0;
 	bytes = 0;
 	messageReceived = false;
+	invalidMessage = false;
 	memset(data, 0, 100*sizeof(char));
 
 	//enable clock for TIM3
@@ -77,7 +80,7 @@ void receive(){
 				bitCount++;
 				if(bitCount % 8 == 0) bytes++;
 
-				if(timeElapsed > halfBitPeriod){
+				if(timeElapsed > halfBitMax){
 					data[bytes] = data[bytes] << 1;
 
 					if(rx == 0){
@@ -100,66 +103,74 @@ void receive(){
 
 	//Once full message has been received, translate, print, and return
 	if(getState() == IDLE && messageReceived){
-		//First we need to get the last bit if it wasn't captured.
-		//This can happen if the last bit is a 1 and the line goes
-		//IDLE. We should have filled bytes.
-		if((bitCount % 8) != 0){
-			data[bytes] = data[bytes] << 1;
-			data[bytes] |= 1;
-			bitCount++;
-		}
 
-
-		//create a temporary buffer of bytes/2
-		char temp[bytes/2];
-		uint8_t data1_xx;
-		uint8_t data2_xx;
-
-		for(int i = 0; i < bytes; i += 2){
-			char asciiChar = 0x00;
-			uint8_t data1 = data[i];
-			uint8_t data2 = data[i+1];
-
-			//four bits of data are contained in each Manchester byte
-			for(int j = 3; j >= 0; j--){
-				asciiChar = asciiChar << 1;
-
-				//shift two bits to position 1 and 0, starting with msb
-				data1_xx = (data1 >> ((j*2) ));
-				data2_xx = (data2 >> ((j*2) ));
-
-				 //Fill the upper nibble
-				 if((data1_xx & 0b11) == 0b01){
-					 asciiChar |= (0b1 << 4);
-				 }
-
-				 //Fill the lower nibble
-				 if((data2_xx & 0b11) == 0b01){
-					 asciiChar |= 0b1;
-				 }
+		if(!invalidMessage){
+			//First we need to get the last bit if it wasn't captured.
+			//This can happen if the last bit is a 1 and the line goes
+			//IDLE. We should have filled bytes.
+			if((bitCount % 8) != 0){
+				data[bytes] = data[bytes] << 1;
+				data[bytes] |= 1;
+				bitCount++;
 			}
 
-			//place decoded byte into temporary buffer
-			temp[i/2] = asciiChar;
-		}
 
-		//send characters to console out
-		for(int i = 0; i < bytes/2; i++){
-			char toConsole = temp[i];
+			//create a temporary buffer of bytes/2
+			char temp[bytes/2];
+			uint8_t data1_xx;
+			uint8_t data2_xx;
 
-			if(toConsole >= ' ' && toConsole <= '~'){
-				usart2_putch(temp[i]);
-			}else{
-				usart2_putch('*');
+			for(int i = 0; i < bytes; i += 2){
+				char asciiChar = 0x00;
+				uint8_t data1 = data[i];
+				uint8_t data2 = data[i+1];
+
+				//four bits of data are contained in each Manchester byte
+				for(int j = 3; j >= 0; j--){
+					asciiChar = asciiChar << 1;
+
+					//shift two bits to position 1 and 0, starting with msb
+					data1_xx = (data1 >> ((j*2) ));
+					data2_xx = (data2 >> ((j*2) ));
+
+					 //Fill the upper nibble
+					 if((data1_xx & 0b11) == 0b01){
+						 asciiChar |= (0b1 << 4);
+					 }
+
+					 //Fill the lower nibble
+					 if((data2_xx & 0b11) == 0b01){
+						 asciiChar |= 0b1;
+					 }
+				}
+
+				//place decoded byte into temporary buffer
+				temp[i/2] = asciiChar;
+			}
+
+			//send characters to console out
+			for(int i = 0; i < bytes/2; i++){
+				char toConsole = temp[i];
+
+				if(toConsole >= ' ' && toConsole <= '~'){
+					usart2_putch(temp[i]);
+				}else{
+					usart2_putch('*');
+				}
+			}
+			usart2_putch('\r');
+			usart2_putch('\n');
+		}else{
+			for(int i = 0; i < 64; i++){
+				usart2_putch(INVALID[i]);
 			}
 		}
-		usart2_putch('\r');
-		usart2_putch('\n');
 
 		//reset all data
 		bitCount = 0;
 		bytes = 0;
 		memset(data, 0, 100*sizeof(char));
 		messageReceived = false;
+		invalidMessage = false;
 	}
 }
