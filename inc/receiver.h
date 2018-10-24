@@ -36,5 +36,6 @@
 #define APB1ENR		(volatile uint32_t*)	0x40023840
 
 extern void init_receiver();
+extern void receive();
 
 #endif
