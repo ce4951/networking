@@ -16,7 +16,7 @@ static const uint16_t polynomial = 0x107; 		// x^8 + x^2 + x + 1 = 100000111 = 0
 static uint8_t crc_table[CRC8_ELEMENTS + 1];	// CRC8 lookup table
 
 // Helper function to calculate CRC
-static uint8_t calculate_crc(const char *data, uint8_t size);
+static uint8_t calculate_CRC(const char *data, uint8_t size);
 
 // Set up CRC lookup table
 void init_CRC()
@@ -26,15 +26,16 @@ void init_CRC()
 	{
 		uint8_t byte = (uint8_t)i;	// Byte to add to lookup table
 
-		// Iterate over every bit in a byte to calculate value to insert
+		// Iterate over every bit in a byte to calculate byte value to insert
 		for(uint8_t j = 0; j < NUM_BITS_PER_BYTE; j++)
 		{
 			byte <<= 1;
+		}
 
-			if(byte & CRC8_MASK)
-			{
-				byte ^= polynomial;
-			}
+		// Only XOR if it is the MSB is set
+		if(byte & CRC8_MASK)
+		{
+			byte ^= polynomial;
 		}
 
 		// Insert byte to lookup table
@@ -45,17 +46,18 @@ void init_CRC()
 // Calculate CRC to send
 uint8_t encode_CRC(const char *data, uint8_t size)
 {
-	return calculate_crc(data, size);
+	return calculate_CRC(data, size);
 }
 
 // Use CRC to detect if there were errors in received data
 bool decode_CRC(const char *data, uint8_t size)
 {
-	return !calculate_crc(data, size);
+	// Calculated CRC will return 0 if no errors
+	return !calculate_CRC(data, size);
 }
 
 // Helper function to calculate CRC
-uint8_t calculate_crc(const char *data, uint8_t size)
+uint8_t calculate_CRC(const char *data, uint8_t size)
 {
 	uint8_t crc = 0;
 
