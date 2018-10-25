@@ -9,20 +9,32 @@
 #include "Manchester_State.h"
 #include "uart_driver.h"
 
-typedef struct {
-	unsigned int position;
-	unsigned int length;
-	char buffer[50];
-} Message;
+#define FRAME_SYNC		0x55
+#define FRAME_V			0x01
+#define FRAME_SOURCE	21
+#define CRC_FLAG		0x01
 
-static Message messageToSend;
+static uint8_t position;
+static Frame frameToSend;
 static bool transferringMessage;
 static volatile uint8_t manchesterBit;
 static volatile int8_t bitmask;
 static volatile GPIOx *GPIOC = (GPIOx *) 0x40020800;
 
+static void package_frame(uint8_t dest, char* message, uint8_t crc);
+
+
 void init_transmitter(){
-	messageToSend = (Message){0,0};
+	frameToSend = (Frame){
+		0x55,
+		0x01,
+		21,
+		0,
+		0,
+		0x01,
+		0,
+		0
+	};
 	transferringMessage = false;
 	manchesterBit = 0;
 	bitmask = 7;
@@ -70,31 +82,39 @@ bool is_transmitting(){
 //clear messageToSend and load the next message using scanf into
 //messageToSend. If state becomes COLLISION, return from transmit
 //and do not clear the message in messageToSend
-void transmit(){
-	//Make sure not in collision state
-	while(getState() == IDLE && !transferringMessage){
-		char temp = usart2_getch_noblock();
-		if(temp != 0 && temp != '\n'){
-			//character was typed, add it to the messageToSend
+void transmit(char* dest, char* message){
+	uint8_t crc = 0;
+	uint8_t destination = strtol(dest);
+	package_frame(destination, message, crc);
 
-			messageToSend.buffer[messageToSend.position] = temp;
-			messageToSend.position++;
-			messageToSend.length++;
+	//end message - start clock
+	transferringMessage = true;
+	position = 0;
+	*(TIM5_CR1) |= 1;
 
-		}else if(temp != 0 && temp == '\n'){
-			//end message - start clock
-			messageToSend.position = 0;
-			transferringMessage = true;
-			*(TIM5_CR1) |= 1;
-		}
-	}
+
+}
+
+void package_frame(uint8_t dest, char* message, uint8_t crc){
+	char packedFrame[frameToSend.length + 7];
+
+	packedFrame[0] = FRAME_SYNC;
+	packedFrame[1] = FRAME_V;
+	packedFrame[2] = FRAME_SOURCE;
+	packedFrame[3] = dest;
+	packedFrame[4] = frameToSend.length;
+	packedFrame[5] = CRC_FLAG;
+	strncpy(&packedFrame[6], message, frameToSend.length);			//TODO Need to know string message length
+	packedFrame[6 + frameToSend.length] = crc;
+
+	strncpy(frameToSend.message, packedFrame, frameToSend.length + 7);
 }
 
 void TIM5_IRQHandler(){
 	if(getState() != COLLISION){
-		if(messageToSend.position < messageToSend.length){
+		if(position < frameToSend.length){
 			//get the character to be sent
-			uint8_t byteToSend = (messageToSend.buffer[messageToSend.position]);
+			uint8_t byteToSend = (frameToSend.message[position]);
 
 			//move the bit to be sent to position 0
 			byteToSend = byteToSend >> bitmask;
@@ -115,22 +135,22 @@ void TIM5_IRQHandler(){
 
 				//if the bitmask is 8, the character has been sent
 				if(bitmask == -1){
-					messageToSend.position++;	// Comment out to send infinite stream of data
+					position++;	// Comment out to send infinite stream of data
 					bitmask = 7;
 				}
 			}
 		}else{
 			//Done receivingMessage the message
 			*(TIM5_CR1) &= ~(1 << 0);
-			messageToSend.position = 0;
-			messageToSend.length = 0;
+			position = 0;
+			frameToSend.length = 0;
 			transferringMessage = false;
 			GPIOC -> ODR |= (1 << 4);
 		}
 
 	}else{
 		//could not finish message and needs to re-transfer
-		messageToSend.position = 0;
+		position = 0;
 		*(TIM5_CR1) &= ~(1 << 0);
 		GPIOC -> ODR |= (1 << 4);
 	}

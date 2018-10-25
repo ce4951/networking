@@ -31,9 +31,22 @@
 #define APB1ENR		(volatile uint32_t*)	0x40023840
 
 #include <stdbool.h>
+#include <stdint.h>
+#include <string.h>
+
+typedef struct {
+	uint8_t sync;
+	uint8_t version;
+	uint8_t source;
+	uint8_t destination;
+	uint8_t length;
+	uint8_t CRC_flag;
+	char message[255 + 7];
+	uint8_t trailer;
+} Frame;
 
 extern void init_transmitter();
 extern bool is_transmitting();
-extern void transmit();
+extern void transmit(char* dest, char* message);
 
 #endif /* TRANSMITTER_H_ */
