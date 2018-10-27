@@ -29,6 +29,7 @@
  * 		none
  */
 int main(void){
+	init_CRC();
 	init_state();
 	init_usart2(baud, F_CPU);
 	init_receiver();
