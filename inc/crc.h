@@ -12,6 +12,10 @@
 #include <inttypes.h>
 #include <stdbool.h>
 
+#define	CRC8_ELEMENTS	256					// Number of elements in a CRC8 lookup table
+#define CRC8_MASK		0x80				// CRC8 mask to test if it is the MSB
+#define BITS_PER_BYTE	8
+
 /*
  * Initialize the CRC by computing the CRC8 lookup table
  */
