@@ -13,6 +13,7 @@
 #include "Transmitter.h"
 #include "uart_driver.h"
 #include "receiver.h"
+#include "crc.h"
 
 #define F_CPU 16000000UL
 #define baud 19200
@@ -28,6 +29,7 @@
  * 		none
  */
 int main(void){
+	init_CRC();
 	init_state();
 	init_usart2(baud, F_CPU);
 	init_receiver();
