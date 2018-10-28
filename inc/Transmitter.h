@@ -35,14 +35,9 @@
 #include <string.h>
 
 typedef struct {
-	uint8_t sync;
-	uint8_t version;
-	uint8_t source;
-	uint8_t destination;
+	uint8_t position;
 	uint8_t length;
-	uint8_t CRC_flag;
 	char message[255 + 7];
-	uint8_t trailer;
 } Frame;
 
 extern void init_transmitter();

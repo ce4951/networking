@@ -25,6 +25,7 @@ typedef struct{
 	char command[5];
 	uint8_t dest;
 	char message[256];
+	uint8_t messageLength;
 	uint8_t location;
 } UserInput;
 
@@ -35,9 +36,6 @@ static UserInput input;
 
 static void printUsage();
 static UserInput* getInput();
-static char* parseCommand();
-static char* parseAddress();
-static char* parseMessage();
 
 /**
  * The main function for this application runs a state machine, while
@@ -70,7 +68,9 @@ int main(void){
 		switch(currentState){
 			case IDLE:
 				if(command){
-					transmit(command->dest, command->message);
+					if(transmit(command->dest, command->message, strlen(command->message))){
+						printUsage();
+					}
 				}
 				break;
 			case BUSY:
