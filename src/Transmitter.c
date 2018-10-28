@@ -14,6 +14,10 @@
 #define FRAME_SOURCE	21
 #define CRC_FLAG		0x01
 
+#define MAX_NODES 25
+#define SUCCESS 0
+#define ERROR 1
+
 static uint8_t position;
 static Frame frameToSend;
 static bool transferringMessage;
@@ -82,17 +86,20 @@ bool is_transmitting(){
 //clear messageToSend and load the next message using scanf into
 //messageToSend. If state becomes COLLISION, return from transmit
 //and do not clear the message in messageToSend
-void transmit(char* dest, char* message){
-	uint8_t crc = 0;
-	uint8_t destination = strtol(dest);
-	package_frame(destination, message, crc);
+int transmit(int dest, char* message, int length){
+	if(dest < 0 || dest > MAX_NODES){
+		return ERROR;
+	}
 
-	//end message - start clock
+	uint8_t crc = 0;
+	package_frame(dest, message, crc);
+
+	//start clock
 	transferringMessage = true;
 	position = 0;
 	*(TIM5_CR1) |= 1;
 
-
+	return SUCCESS;
 }
 
 void package_frame(uint8_t dest, char* message, uint8_t crc){

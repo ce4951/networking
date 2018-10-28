@@ -47,6 +47,6 @@ typedef struct {
 
 extern void init_transmitter();
 extern bool is_transmitting();
-extern void transmit(char* dest, char* message);
+extern int transmit(int dest, char* message, int length);
 
 #endif /* TRANSMITTER_H_ */

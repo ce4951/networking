@@ -8,6 +8,8 @@
  * 3 different modes. A scanning mode, an alarm mode, and an admin mode
  */
 
+#include <stdlib.h>
+
 #include "Manchester_State.h"
 #include "gpio.h"
 #include "Transmitter.h"
@@ -19,18 +21,17 @@
 #define baud 19200
 
 typedef struct{
-	uint8_t dest;
 	char buffer[5 + 3 + 256];
 	char command[5];
-	char address[3];
+	uint8_t dest;
 	char message[256];
-	uint8_t index;
+	uint8_t location;
 } UserInput;
 
 static const char USAGE[] = "Usage:\r\n"
 							"<Command> <Address> <Message>\r\n"
 							"Example: Send 15 Hello\r\n";
-static UserInput* input;
+static UserInput input;
 
 static void printUsage();
 static UserInput* getInput();
@@ -57,7 +58,7 @@ int main(void){
 
 	printUsage();
 
-	*input = (UserInput){0,0,0,0,0,0};
+	input.location = 0;
 
 	enum STATES currentState = getState();
 
@@ -69,7 +70,7 @@ int main(void){
 		switch(currentState){
 			case IDLE:
 				if(command){
-					transmit(command->address, command->message);
+					transmit(command->dest, command->message);
 				}
 				break;
 			case BUSY:
@@ -89,61 +90,31 @@ static UserInput* getInput(){
 	char temp = usart2_getch_noblock();
 	if(temp != 0 && temp != '\n'){
 		//character was typed, add it to the messageToSend
-		input -> buffer[input -> index] = temp;
-		input -> index++;
+		input.buffer[input.location] = temp;
+		input.location++;
 	}else if(temp != 0 && temp == '\n'){
-		input -> buffer[input -> index] = '\0';
-		char* command = parseCommand();
-		char* address = parseAddress();
-		char* message = parseMessage();
+		input.buffer[input.location] = '\0';
+		char* command = strtok(input.buffer, " ");
+		char* address = strtok('\0', " ");
+		char* message = strtok('\0', " ");
+		char* next_token = strtok('\0', " ");
 
-		if(!(command && address && message)){
+		if(!(command && address && message) || next_token){
 			printUsage();
-			input -> index = 0;
+			input.location = 0;
 			return '\0';
 		}
 
-		strncpy(input -> command, command, 5);
-		strncpy(input -> address, address, 3);
-		strncpy(input -> message, message, 256);
-		input -> index = 0;
-		return input;
+		strncpy(input.command, command, 5);
+		strncpy(input.message, message, 256);
+
+		char** end;
+		input.dest = strtol(address, end, 10);
+
+		input.location = 0;
+		return &input;
 	}
 	return '\0';
-}
-
-static char* parseCommand(){
-	char* temp = malloc(5);
-	for(int i = 0; (input -> buffer[i]) != ' '; i++){
-		if(i > 3) return '\0';
-
-		temp[i] = input -> buffer[i];
-	}
-	temp[4] = '\0';
-	return temp;
-}
-
-static char* parseAddress(){
-	char* temp = malloc(3);
-	for(int i = 0; (input -> buffer[i]) != ' '; i++){
-		if(i > 2) return '\0';
-
-		temp[i] = input -> buffer[i];
-	}
-	temp[3] = '\0';
-	return temp;
-}
-
-static char* parseMessage(){
-	char* temp = malloc(256);
-	int i = 0;
-	for(; (input -> buffer[i]) != '\0'; i++){
-		if(i > 255) return '\0';
-
-		temp[i] = input -> buffer[i];
-	}
-	temp[i] = '\0';
-	return temp;
 }
 
 static void printUsage(){
