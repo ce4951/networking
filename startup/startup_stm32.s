@@ -11,7 +11,7 @@
    Modified by Darrin Rothe to enable floating point in the reset handler and
    to add weakly defined IRQ vectors.
 */
-	
+
   .syntax unified
   .cpu cortex-m4
   .thumb
