@@ -36,9 +36,10 @@ extern uint8_t encode_CRC(const char *data, uint8_t size);
  *
  * @param data - The data that was received
  * @param size - The number of bytes in 'data'
+ * @param fcs - The FCS to compare the CRC against
  *
  * @return - True if no errors, false if errors
  */
-extern bool decode_CRC(const char *data, uint8_t size);
+extern bool decode_CRC(const char *data, uint8_t size, uint8_t fcs);
 
 #endif	// End compiler guard

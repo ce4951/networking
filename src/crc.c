@@ -48,10 +48,10 @@ uint8_t encode_CRC(const char *data, uint8_t size)
 }
 
 // Use CRC to detect if there were errors in received data
-bool decode_CRC(const char *data, uint8_t size)
+bool decode_CRC(const char *data, uint8_t size, uint8_t fcs)
 {
 	// Calculated CRC will return 0 (false) if no errors
-	return !crc_table[calculate_CRC(data, size) ^ data[0]];
+	return !(calculate_CRC(data, size) ^ fcs);
 }
 
 // Helper function to calculate CRC
@@ -62,7 +62,7 @@ uint8_t calculate_CRC(const char *data, uint8_t size)
 	  // Calculate cumulative CRC for each byte in data
 	  for(int i = 0; i < size; i++)
 	  {
-	    crc = crc_table[crc ^ data[size - i]];
+	    crc = crc_table[crc ^ data[i]];
 	  }
 
 	  return crc;
