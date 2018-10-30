@@ -111,7 +111,7 @@ void package_frame(uint8_t dest, char* message, uint8_t length, uint8_t crc){
 }
 
 void TIM5_IRQHandler(){
-	if(getState() != COLLISION){
+	if(getState() != COLLISION && collisionTimeExpired()){
 		if(frameToSend.position < frameToSend.length){
 			//get the character to be sent
 			uint8_t byteToSend = (frameToSend.message[frameToSend.position]);
@@ -151,8 +151,10 @@ void TIM5_IRQHandler(){
 	}else{
 		//could not finish message and needs to re-transfer
 		frameToSend.position = 0;
-		*(TIM5_CR1) &= ~(1 << 0);
+		//*(TIM5_CR1) &= ~(1 << 0);
 		GPIOC -> ODR |= (1 << 4);
+		bitmask = 7;
+		manchesterBit = 0;
 	}
 
 	//clear flag

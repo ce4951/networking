@@ -16,6 +16,7 @@
 #include "uart_driver.h"
 #include "receiver.h"
 #include "crc.h"
+#include "Collision_Delay.h"
 
 #define F_CPU 16000000UL
 #define baud 19200
@@ -48,6 +49,7 @@ static UserInput* getInput();
  * 		none
  */
 int main(void){
+	init_collision_delay();
 	init_CRC();
 	init_state();
 	init_usart2(baud, F_CPU);
@@ -77,6 +79,7 @@ int main(void){
 				receive();
 				break;
 			case COLLISION:
+				setDelayTimeout();
 				break;
 			default:
 				break;
