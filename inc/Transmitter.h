@@ -8,6 +8,12 @@
 #ifndef TRANSMITTER_H_
 #define TRANSMITTER_H_
 
+#include <stdbool.h>
+#include <stdint.h>
+#include <string.h>
+
+#include "Collision_Delay.h"
+
 //NVIC constants
 #define NVIC_ISER1 (volatile uint32_t*)		0xE000E104
 #define NVIC_IPR12 (volatile uint32_t*)		0xE000E430
@@ -30,10 +36,15 @@
 #define APB2ENR		(volatile uint32_t*)	0x40023844
 #define APB1ENR		(volatile uint32_t*)	0x40023840
 
-#include <stdbool.h>
+
+typedef struct {
+	uint8_t position;
+	uint8_t length;
+	char message[255 + 7];
+} Frame;
 
 extern void init_transmitter();
 extern bool is_transmitting();
-extern void transmit();
+extern int transmit(int dest, char* message, int length);
 
 #endif /* TRANSMITTER_H_ */

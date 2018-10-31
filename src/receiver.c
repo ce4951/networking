@@ -4,12 +4,19 @@
 #define timerOffset 65535
 #define halfBitMax 10000
 
-static const char INVALID[] = "[INFO] Message outside specification received and discarded.\r\n";
+#define SYNC_OFFSET 0
+#define VERSION_OFFSET 1
+#define SOURCE_OFFSET 2
+#define DEST_OFFSET 3
+#define LENGTH_OFFSET 4
+#define CRC_OFFSET 5
+#define MESSAGE_OFFSET 6
 
+static const char DATA_CORRUPT[] = "[INFO] A message was received, but the data was corrupted.\r\n";
 
 unsigned int bitCount;
 unsigned int bytes;
-uint8_t data[100];
+uint8_t data[256 + 7];
 
 bool messageReceived;
 bool invalidMessage;
@@ -21,7 +28,7 @@ void init_receiver(){
 	bytes = 0;
 	messageReceived = false;
 	invalidMessage = false;
-	memset(data, 0, 100*sizeof(char));
+	memset(data, 0, 263*sizeof(char));
 
 	//enable clock for TIM3
 	*(APB1ENR) |= (1 << 1);
@@ -104,72 +111,80 @@ void receive(){
 	//Once full message has been received, translate, print, and return
 	if(getState() == IDLE && messageReceived){
 
-		if(!invalidMessage){
-			//First we need to get the last bit if it wasn't captured.
-			//This can happen if the last bit is a 1 and the line goes
-			//IDLE. We should have filled bytes.
-			if((bitCount % 8) != 0){
-				data[bytes] = data[bytes] << 1;
-				data[bytes] |= 1;
-				bitCount++;
+		//First we need to get the last bit if it wasn't captured.
+		//This can happen if the last bit is a 1 and the line goes
+		//IDLE. We should have filled bytes.
+		if((bitCount % 8) != 0){
+			data[bytes] = data[bytes] << 1;
+			data[bytes] |= 1;
+			bitCount++;
+		}
+
+
+		//create a temporary buffer of bytes/2
+		char temp[bytes/2];
+		uint8_t data1_xx;
+		uint8_t data2_xx;
+
+		for(int i = 0; i < bytes; i += 2){
+			char asciiChar = 0x00;
+			uint8_t data1 = data[i];
+			uint8_t data2 = data[i+1];
+
+			//four bits of data are contained in each Manchester byte
+			for(int j = 3; j >= 0; j--){
+				asciiChar = asciiChar << 1;
+
+				//shift two bits to position 1 and 0, starting with msb
+				data1_xx = (data1 >> ((j*2) ));
+				data2_xx = (data2 >> ((j*2) ));
+
+				 //Fill the upper nibble
+				 if((data1_xx & 0b11) == 0b01){
+					 asciiChar |= (0b1 << 4);
+				 }
+
+				 //Fill the lower nibble
+				 if((data2_xx & 0b11) == 0b01){
+					 asciiChar |= 0b1;
+				 }
 			}
 
+			//place decoded byte into temporary buffer
+			temp[i/2] = asciiChar;
+		}
 
-			//create a temporary buffer of bytes/2
-			char temp[bytes/2];
-			uint8_t data1_xx;
-			uint8_t data2_xx;
+		uint8_t messageLength = temp[LENGTH_OFFSET];
+		uint8_t dest = temp[DEST_OFFSET];
+		uint8_t fcs = temp[MESSAGE_OFFSET + messageLength];
 
-			for(int i = 0; i < bytes; i += 2){
-				char asciiChar = 0x00;
-				uint8_t data1 = data[i];
-				uint8_t data2 = data[i+1];
+		char message[messageLength + 1];
+		strncpy(message, &temp[MESSAGE_OFFSET], messageLength);
 
-				//four bits of data are contained in each Manchester byte
-				for(int j = 3; j >= 0; j--){
-					asciiChar = asciiChar << 1;
+		bool validMessage = decode_CRC(message, messageLength, fcs);
 
-					//shift two bits to position 1 and 0, starting with msb
-					data1_xx = (data1 >> ((j*2) ));
-					data2_xx = (data2 >> ((j*2) ));
-
-					 //Fill the upper nibble
-					 if((data1_xx & 0b11) == 0b01){
-						 asciiChar |= (0b1 << 4);
-					 }
-
-					 //Fill the lower nibble
-					 if((data2_xx & 0b11) == 0b01){
-						 asciiChar |= 0b1;
-					 }
-				}
-
-				//place decoded byte into temporary buffer
-				temp[i/2] = asciiChar;
-			}
+		if(validMessage && (dest == 21 || dest == 0)){
 
 			//send characters to console out
-			for(int i = 0; i < bytes/2; i++){
-				char toConsole = temp[i];
-
-				if(toConsole >= ' ' && toConsole <= '~'){
-					usart2_putch(temp[i]);
+			for(int i = 0; i < messageLength; i++){
+				if(message[i] >= ' ' && message[i] <= '~'){
+					usart2_putch(message[i]);
 				}else{
 					usart2_putch('*');
 				}
 			}
 			usart2_putch('\r');
 			usart2_putch('\n');
-		}else{
-			for(int i = 0; i < 64; i++){
-				usart2_putch(INVALID[i]);
+		}else if(!validMessage){
+			for(int i = 0; DATA_CORRUPT[i] != '\0'; i++){
+				usart2_putch(DATA_CORRUPT[i]);
 			}
 		}
 
 		//reset all data
 		bitCount = 0;
 		bytes = 0;
-		memset(data, 0, 100*sizeof(char));
+		memset(data, 0, 263*sizeof(char));
 		messageReceived = false;
 		invalidMessage = false;
 	}
