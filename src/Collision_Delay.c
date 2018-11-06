@@ -61,6 +61,8 @@ void setDelayTimeout(){
 		//compare to radnom milliseconds
 		*(TIM9_CCR1) = (n);
 
+		while(getState() == COLLISION){}
+
 		//enable the counter by setting CEN bit in CR1
 		*(TIM9_CR1) |= 1;
 
