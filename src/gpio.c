@@ -10,6 +10,11 @@ static volatile GPIO* assign_port(char port);
 static volatile GPIO *gpioa = (GPIO *)GPIOA_BASE;
 static volatile GPIO *gpiob = (GPIO *)GPIOB_BASE;
 static volatile GPIO *gpioc = (GPIO *)GPIOC_BASE;
+static volatile GPIO *gpiod = (GPIO *)GPIOD_BASE;
+static volatile GPIO *gpioe = (GPIO *)GPIOE_BASE;
+static volatile GPIO *gpiof = (GPIO *)GPIOF_BASE;
+static volatile GPIO *gpiog = (GPIO *)GPIOG_BASE;
+static volatile GPIO *gpioh = (GPIO *)GPIOH_BASE;
 //static volatile RCC  *rcc   = (RCC  *)RCC_BASE;
 
 /** Functions **/
@@ -111,6 +116,7 @@ GPIO_VALUE get_input_value(char port, uint8_t pin)
 	return ((selected_port->IDR & (1 << pin)) >> pin);
 }
 
+// Clear output pins and set others in one fell swoop
 void clear_and_set_output(char port, uint16_t clear, uint16_t set)
 {
 	// Get the port address to access
@@ -126,10 +132,20 @@ static volatile GPIO* assign_port(char port)
 	{
 		case 'A': case 'a':
 			return gpioa;
-		case 'B':case 'b':
+		case 'B': case 'b':
 			return gpiob;
-		case 'C':case 'c':
+		case 'C': case 'c':
 			return gpioc;
+		case 'D': case 'd':
+			return gpiod;
+		case 'E': case 'e':
+			return gpioe;
+		case 'F': case 'f':
+			return gpiof;
+		case 'G': case 'g':
+			return gpiog;
+		case 'H': case 'h':
+			return gpioh;
 		default:
 			return 0;
 	}

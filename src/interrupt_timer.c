@@ -7,13 +7,14 @@
 
 #include "interrupt_timer.h"
 
-static volatile RCC *rcc = (RCC *)RCC_BASE;
+//static volatile RCC *rcc = (RCC *)RCC_BASE;
 static volatile NVIC *nvic = (NVIC *)NVIC_BASE;
 
 void init_interrupt_timer(){
 	//enable clock for TIM2
 	//*(APB1ENR) |= 1;
-	rcc->APB1ENR |= 1;
+	//rcc->APB1ENR |= 1;
+	enable_timer_clock(2);
 
 	//reload set to 1.11 ms
 	*(TIM2_ARR) = (18000-1);	// 1/16000000 * 17760 = 1.11ms

@@ -41,22 +41,46 @@ void enable_timer_clock(int timer)
 	switch(timer)
 	{
 		case 1:
+			rcc->APB2ENR |= (TIM1_CLK_EN);
 			break;
 		case 2:
+			rcc->APB1ENR |= (TIM2_CLK_EN);
 			break;
 		case 3:
+			rcc->APB1ENR |= (TIM3_CLK_EN);
 			break;
 		case 4:
+			rcc->APB1ENR |= (TIM4_CLK_EN);
 			break;
 		case 5:
+			rcc->APB1ENR |= (TIM5_CLK_EN);
 			break;
 		case 6:
+			rcc->APB1ENR |= (TIM6_CLK_EN);
 			break;
 		case 7:
+			rcc->APB1ENR |= (TIM7_CLK_EN);
 			break;
 		case 8:
+			rcc->APB2ENR |= (TIM8_CLK_EN);
 			break;
 		case 9:
+			rcc->APB2ENR |= (TIM9_CLK_EN);
+			break;
+		case 10:
+			rcc->APB2ENR |= (TIM10_CLK_EN);
+			break;
+		case 11:
+			rcc->APB2ENR |= (TIM11_CLK_EN);
+			break;
+		case 12:
+			rcc->APB1ENR |= (TIM12_CLK_EN);
+			break;
+		case 13:
+			rcc->APB1ENR |= (TIM13_CLK_EN);
+			break;
+		case 14:
+			rcc->APB1ENR |= (TIM14_CLK_EN);
 			break;
 		default:
 			break;
@@ -66,5 +90,5 @@ void enable_timer_clock(int timer)
 
 void enable_systemconfig_clock()
 {
-
+	rcc->APB2ENR |= (SYSCFG_CLK_EN);
 }

@@ -8,7 +8,7 @@
 #include "RX.h"
 
 static volatile EXTI *EXTI6 = (EXTI *) 0x40013C00;
-static volatile RCC *rcc = (RCC *)RCC_BASE;
+//static volatile RCC *rcc = (RCC *)RCC_BASE;
 static volatile NVIC *nvic = (NVIC *)NVIC_BASE;
 
 void init_RX_channel(){
@@ -25,7 +25,8 @@ void init_RX_channel(){
 
 	//Enable SYSCFGEN
 	//(*APB2ENR) |= 1<<14;
-	rcc->APB2LPENR |= (1 << 14);
+	//rcc->APB2ENR |= (1 << 14);
+	enable_systemconfig_clock();
 
 	//Set port A for SYSCFG
 	(*EXTICR2) &= ~((0b1111) << 8);

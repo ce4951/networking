@@ -21,7 +21,7 @@ static bool transferringMessage;
 static volatile uint8_t manchesterBit;
 static volatile int8_t bitmask;
 //static volatile GPIO *GPIOC = (GPIO *)GPIOC_BASE;
-static volatile RCC *rcc = (RCC *)RCC_BASE;
+//static volatile RCC *rcc = (RCC *)RCC_BASE;
 static volatile NVIC *nvic = (NVIC *)NVIC_BASE;
 
 static void package_frame(uint8_t dest, char* message, uint8_t length, uint8_t crc);
@@ -37,13 +37,14 @@ void init_transmitter(){
 	set_pin_mode('C', 4, OUTPUT);
 
 	//set GPIO pin high
-	set_output_value('C', 4, ON);
 	//GPIOC->ODR |= (1 << 4);
+	set_output_value('C', 4, ON);
 
 	//setup timer for sending data
 	//enable clock for TIM5
 	//*(APB1ENR) |= (1 << 3);
-	rcc->APB1ENR |= TIM5_CLK_EN;
+	//rcc->APB1ENR |= TIM5_CLK_EN;
+	enable_timer_clock(5);
 
 	//reload set to 500 us
 	*(TIM5_ARR) = (8000-1);	// 1/16000000 * 8000 = 500 us

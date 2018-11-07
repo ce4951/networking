@@ -14,7 +14,7 @@
 
 static const char DATA_CORRUPT[] = "[INFO] A message was received, but the data was corrupted.\r\n";
 
-static volatile RCC *rcc = (RCC *)RCC_BASE;
+//static volatile RCC *rcc = (RCC *)RCC_BASE;
 
 unsigned int bitCount;
 unsigned int bytes;
@@ -34,7 +34,8 @@ void init_receiver(){
 
 	//enable clock for TIM3
 	//*(APB1ENR) |= (1 << 1);
-	rcc->APB1ENR |= (1 << 1);
+	//rcc->APB1ENR |= (1 << 1);
+	enable_timer_clock(3);
 
 	//select the active input - write CCMR1 CC1S bits
 	*(TIM3_CCMR1) &= ~(0b11 << 0);
