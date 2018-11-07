@@ -17,6 +17,7 @@
 #include "Transmitter.h"
 #include "uart_driver.h"
 #include "crc.h"
+#include "RCC.h"
 
 // TIM3 constants 0x4000 0400
 #define TIM3_PSC 	(volatile uint32_t*)	0x40000428
@@ -32,9 +33,9 @@
 #define TIM3_CNT	(volatile uint32_t*)	0x40000424
 
 // RCC constants
-#define RCC_BASE	(volatile uint32_t*)	0x40023800
-#define APB2ENR		(volatile uint32_t*)	0x40023844
-#define APB1ENR		(volatile uint32_t*)	0x40023840
+//#define RCC_BASE	(volatile uint32_t*)	0x40023800
+//#define APB2ENR		(volatile uint32_t*)	0x40023844
+//#define APB1ENR		(volatile uint32_t*)	0x40023840
 
 extern void init_receiver();
 extern void receive();

@@ -11,6 +11,7 @@
 #define UART_DRIVER_H_
 
 #include <inttypes.h>
+#include <stdio.h>
 #include "ringbuffer.h"
 
 // RCC registers

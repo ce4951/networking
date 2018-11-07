@@ -11,9 +11,11 @@
 #include <inttypes.h>
 
 #include "gpio.h"
+#include "RCC.h"
+#include "nvic.h"
 
 #define NVIC_ISER0 (volatile uint32_t*)		0xE000E100
-#define APB2ENR		(volatile uint32_t*)	0x40023844
+//#define APB2ENR		(volatile uint32_t*)	0x40023844
 #define EXTICR2		(volatile uint32_t*)	0x4001380C
 #define NVIC_IPR5		(volatile uint32_t*)	0xE000E414
 

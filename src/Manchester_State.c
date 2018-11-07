@@ -6,11 +6,10 @@
  */
 
 #include "Manchester_State.h"
-#include "gpio.h"
 
 static uint8_t RX;
 static volatile EXTI *EXTI6 = (EXTI *) 0x40013C00;
-static volatile GPIOx *GPIOC = (GPIOx *) 0x40020800;
+//static volatile GPIO *GPIOC = (GPIO *)GPIOC_BASE;
 
 static volatile enum STATES state;
 
@@ -39,7 +38,7 @@ uint8_t get_rx(){
 
 static void initLEDs(){
 	//enable GPIOC clock
-	enable_clock('C');
+	enable_gpio_clock('C');
 
 	//GPIOC clock already selected
 	//set GPIOC pin 1,2,3 to output for LEDs
@@ -51,13 +50,16 @@ static void initLEDs(){
 static void setLED(enum STATES state){
 	switch(state){
 		case IDLE:
-			GPIOC -> BSSR |= (((0b110 << 1) << 16) | (0b001 << 1));
+			//GPIOC->BSRR |= (((0b110 << 1) << 16) | (0b001 << 1));
+			clear_and_set_output('C', 0b110 << 1, 0b001 << 1);
 			break;
 		case BUSY:
-			GPIOC -> BSSR |= (((0b101 << 1) << 16) | (0b010 << 1));
+			//GPIOC->BSRR |= (((0b101 << 1) << 16) | (0b010 << 1));
+			clear_and_set_output('C', 0b101 << 1, 0b010 << 1);
 			break;
 		case COLLISION:
-			GPIOC -> BSSR |= (((0b011 << 1) << 16) | (0b100 << 1));
+			//GPIOC->BSRR |= (((0b011 << 1) << 16) | (0b100 << 1));
+			clear_and_set_output('C', 0b011 << 1, 0b100 << 1);
 			break;
 		default:
 			break;
@@ -74,7 +76,8 @@ void TIM2_IRQHandler(void){
 	}
 
 	// Obtain the most recent RX value
-	RX = (GPIOC -> IDR) & (1 << 6);
+	//RX = (GPIOC->IDR) & (1 << 6);
+	RX = get_input_value('C', 6);
 
 	// Set LEDs to match state
 	setLED(state);
@@ -92,7 +95,8 @@ void EXTI9_5_IRQHandler(void){
 	state = BUSY;
 
 	//capture RX
-	RX = (GPIOC -> IDR) & (1 << 6);
+	//RX = (GPIOC->IDR) & (1 << 6);
+	RX = get_input_value('C', 6);
 
 	// Set LEDs to match state
 	setLED(state);
@@ -101,4 +105,3 @@ void EXTI9_5_IRQHandler(void){
 	*(TIM2_SR) &= ~(1<<2);
 	EXTI6 -> PR |= 1<<6;
 }
-

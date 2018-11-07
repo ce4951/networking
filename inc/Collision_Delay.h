@@ -13,8 +13,11 @@
 #include <stdlib.h>
 #include <stdbool.h>
 
+#include "RCC.h"
+#include "Manchester_State.h"
+
 //SysTic constants
-#define APB2ENR (volatile uint32_t*) 0x40023844
+//#define APB2ENR (volatile uint32_t*) 0x40023844
 #define TIM9_PSK (volatile uint32_t*) 0x40014028
 #define TIM9_CCMR1 (volatile uint32_t*) 0x40014018
 #define TIM9_CCER (volatile uint32_t*) 0x40014020

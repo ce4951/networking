@@ -111,7 +111,7 @@ static UserInput* getInput(){
 		strncpy(input.command, command, 5);
 		strncpy(input.message, message, 256);
 
-		char** end;
+		char** end = 0;
 		input.dest = strtol(address, end, 10);
 
 		input.location = 0;

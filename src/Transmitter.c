@@ -6,9 +6,6 @@
  */
 
 #include "Transmitter.h"
-#include "Manchester_State.h"
-#include "uart_driver.h"
-#include "crc.h"
 
 #define FRAME_SYNC		0x55
 #define FRAME_V			0x01
@@ -23,7 +20,9 @@ static Frame frameToSend;
 static bool transferringMessage;
 static volatile uint8_t manchesterBit;
 static volatile int8_t bitmask;
-static volatile GPIOx *GPIOC = (GPIOx *) 0x40020800;
+//static volatile GPIO *GPIOC = (GPIO *)GPIOC_BASE;
+//static volatile RCC *rcc = (RCC *)RCC_BASE;
+static volatile NVIC *nvic = (NVIC *)NVIC_BASE;
 
 static void package_frame(uint8_t dest, char* message, uint8_t length, uint8_t crc);
 
@@ -38,11 +37,14 @@ void init_transmitter(){
 	set_pin_mode('C', 4, OUTPUT);
 
 	//set GPIO pin high
-	GPIOC -> ODR |= (1 << 4);
+	//GPIOC->ODR |= (1 << 4);
+	set_output_value('C', 4, ON);
 
 	//setup timer for sending data
 	//enable clock for TIM5
-	*(APB1ENR) |= (1 << 3);
+	//*(APB1ENR) |= (1 << 3);
+	//rcc->APB1ENR |= TIM5_CLK_EN;
+	enable_timer_clock(5);
 
 	//reload set to 500 us
 	*(TIM5_ARR) = (8000-1);	// 1/16000000 * 8000 = 500 us
@@ -61,10 +63,12 @@ void init_transmitter(){
 	*(TIM5_DIER) |= 1<<2;
 
 	//enable in NVIC (50)
-	*(NVIC_ISER1) |= 1<<18;
+	//*(NVIC_ISER1) |= 1<<18;
+	nvic->ISER1 |= (1 << 18);
 
 	//set lower interrupt priority
-	*(NVIC_IPR12) |= (0xFF << 16);
+	//*(NVIC_IPR12) |= (0xFF << 16);
+	nvic->IPR12 |= (0xFF << 16);
 
 	//Don't enable the counter. Nothing to Transfer yet
 }
@@ -127,7 +131,9 @@ void TIM5_IRQHandler(){
 			manchesterBit = ~manchesterBit;
 
 			//Set the GPIO pin according to bit 0
-			GPIOC -> BSSR |= (((~byteToSend << 4) << 16) | (byteToSend << 4));
+			//GPIOC->BSRR |= (((~byteToSend << 4) << 16) | (byteToSend << 4));
+			clear_and_set_output('C', ~byteToSend << 4, byteToSend << 4);
+
 
 			//if the manchester bit is 0, next bit needed
 			if((manchesterBit & 0x01) == 0x00){
@@ -145,14 +151,16 @@ void TIM5_IRQHandler(){
 			frameToSend.position = 0;
 			frameToSend.length = 0;
 			transferringMessage = false;
-			GPIOC -> ODR |= (1 << 4);
+			//GPIOC->ODR |= (1 << 4);
+			set_output_value('C', 4, ON);
 		}
 
 	}else{
 		//could not finish message and needs to re-transfer
 		frameToSend.position = 0;
 		//*(TIM5_CR1) &= ~(1 << 0);
-		GPIOC -> ODR |= (1 << 4);
+		//GPIOC->ODR |= (1 << 4);
+		set_output_value('C', 4, ON);
 		bitmask = 7;
 		manchesterBit = 0;
 	}
@@ -160,4 +168,3 @@ void TIM5_IRQHandler(){
 	//clear flag
 	*(TIM5_SR) &= ~(1<<2);
 }
-

@@ -13,6 +13,12 @@
 #include <string.h>
 
 #include "Collision_Delay.h"
+#include "Manchester_State.h"
+#include "uart_driver.h"
+#include "crc.h"
+#include "gpio.h"
+#include "RCC.h"
+#include "nvic.h"
 
 //NVIC constants
 #define NVIC_ISER1 (volatile uint32_t*)		0xE000E104
@@ -32,9 +38,9 @@
 #define TIM5_CNT	(volatile uint32_t*)	0x40000C24
 
 //RCC constants
-#define RCC_BASE	(volatile uint32_t*)	0x40023800
-#define APB2ENR		(volatile uint32_t*)	0x40023844
-#define APB1ENR		(volatile uint32_t*)	0x40023840
+//#define RCC_BASE	(volatile uint32_t*)	0x40023800
+//#define APB2ENR		(volatile uint32_t*)	0x40023844
+//#define APB1ENR		(volatile uint32_t*)	0x40023840
 
 
 typedef struct {

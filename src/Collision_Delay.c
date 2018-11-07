@@ -9,12 +9,16 @@
 
 #define N_MAX 1000
 
+//static volatile RCC *rcc = (RCC *)RCC_BASE;
+
 static bool timeoutObserved;
 static bool timeoutSet;
 
 void init_collision_delay(){
 	//enable clock for TIM2
-	*(APB2ENR) |= (1 << 16);
+	//*(APB2ENR) |= (1 << 16);
+	//rcc->APB2ENR |= TIM9_CLK_EN;
+	enable_timer_clock(9);
 
 	//load 16000 into STK_LOAD
 	*(TIM9_PSK) = 16000;//1ms
@@ -60,6 +64,8 @@ void setDelayTimeout(){
 
 		//compare to radnom milliseconds
 		*(TIM9_CCR1) = (n);
+
+		while(getState() == COLLISION){}
 
 		//enable the counter by setting CEN bit in CR1
 		*(TIM9_CR1) |= 1;
