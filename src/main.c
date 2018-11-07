@@ -100,7 +100,17 @@ static UserInput* getInput(){
 		char* command = strtok(input.buffer, " ");
 		char* address = strtok('\0', " ");
 		char* message = strtok('\0', " ");
+
 		char* next_token = strtok('\0', " ");
+		char finalMessage[255];
+
+		strcpy(finalMessage, message);
+
+		while(next_token != '\0'){
+			strncat(finalMessage, " ", 1);
+			strcat(finalMessage, next_token);
+			next_token = strtok('\0', " ");
+		}
 
 		if(!(command && address && message) || next_token){
 			printUsage();
@@ -109,7 +119,7 @@ static UserInput* getInput(){
 		}
 
 		strncpy(input.command, command, 5);
-		strncpy(input.message, message, 256);
+		strncpy(input.message, finalMessage, 256);
 
 		char** end;
 		input.dest = strtol(address, end, 10);
