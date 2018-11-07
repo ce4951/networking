@@ -7,7 +7,6 @@
  *  	Author: Mitchell Larson
  */
 #include "uart_driver.h"
-#include <stdio.h>
 
 static volatile RingBuffer* sendBuffer;
 static volatile RingBuffer* recieveBuffer;
@@ -115,4 +114,3 @@ void USART2_IRQHandler(void){
 		}
 	}
 }
-

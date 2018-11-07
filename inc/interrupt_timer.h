@@ -9,6 +9,8 @@
 #define INTERRUPT_TIMER_H_
 
 #include <inttypes.h>
+#include "RCC.h"
+#include "nvic.h"
 
 //NVIC constants
 #define NVIC_ISER0 (volatile uint32_t*)		0xE000E100
@@ -27,9 +29,9 @@
 #define TIM2_CNT	(volatile uint32_t*)	0x40000024
 
 //RCC constants
-#define RCC_BASE	(volatile uint32_t*)	0x40023800
-#define APB2ENR		(volatile uint32_t*)	0x40023844
-#define APB1ENR		(volatile uint32_t*)	0x40023840
+//#define RCC_BASE	(volatile uint32_t*)	0x40023800
+//#define APB2ENR		(volatile uint32_t*)	0x40023844
+//#define APB1ENR		(volatile uint32_t*)	0x40023840
 
 extern void init_interrupt_timer();
 
