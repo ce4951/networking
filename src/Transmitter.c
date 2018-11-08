@@ -104,10 +104,10 @@ void package_frame(uint8_t dest, char* message, uint8_t length, uint8_t crc){
 	packedFrame[3] = dest;
 	packedFrame[4] = length;
 	packedFrame[5] = CRC_FLAG;
-	strncpy(&packedFrame[6], message, length);
+	memcpy(&packedFrame[6], message, length);
 	packedFrame[6 + length] = crc;
 
-	strncpy(frameToSend.message, packedFrame, length + 7);
+	memcpy(frameToSend.message, packedFrame, length + 7);
 }
 
 void TIM5_IRQHandler(){

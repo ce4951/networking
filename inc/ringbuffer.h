@@ -10,7 +10,7 @@
 
 #include <stdint.h>
 
-#define BUF_SIZE 50
+#define BUF_SIZE 255
 #define BACK_SPACE 127
 
 typedef struct {

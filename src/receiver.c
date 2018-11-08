@@ -157,13 +157,19 @@ void receive(){
 		uint8_t messageLength = temp[LENGTH_OFFSET];
 		uint8_t dest = temp[DEST_OFFSET];
 		uint8_t fcs = temp[MESSAGE_OFFSET + messageLength];
+		uint8_t src = temp[SOURCE_OFFSET];
+		uint8_t crc = temp[CRC_OFFSET];
 
 		char message[messageLength + 1];
 		strncpy(message, &temp[MESSAGE_OFFSET], messageLength);
 
-		bool validMessage = decode_CRC(message, messageLength, fcs);
+		bool validMessage = true;
 
-		if(validMessage && (dest == 21 || dest == 0)){
+		if(crc != 0x00){
+			validMessage = decode_CRC(message, messageLength, fcs);
+		}
+
+		if(validMessage && (dest == 21 || dest == 0) && src != 21){
 
 			//send characters to console out
 			for(int i = 0; i < messageLength; i++){
@@ -175,7 +181,7 @@ void receive(){
 			}
 			usart2_putch('\r');
 			usart2_putch('\n');
-		}else if(!validMessage){
+		}else if(!validMessage  && (dest == 21 || dest == 0) && src != 21){
 			for(int i = 0; DATA_CORRUPT[i] != '\0'; i++){
 				usart2_putch(DATA_CORRUPT[i]);
 			}
